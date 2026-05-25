@@ -46,7 +46,7 @@ export default function Inicio() {
     setResumo({ recebidoHoje, pendenteHoje, recebidoMes: mes.totalRecebido });
   }
 
-  useFocusEffect(useCallback(() => { carregarDados(); }, []));
+  useFocusEffect(useCallback(() => { carregarDados(); }, [usuario]));
 
   const dataHoje = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long',

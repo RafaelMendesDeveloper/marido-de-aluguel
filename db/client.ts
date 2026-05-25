@@ -46,4 +46,14 @@ expo.execSync(`
   );
 `);
 
+// Migrations: adiciona colunas que podem não existir em bancos mais antigos
+const migrations = [
+  `ALTER TABLE agendamentos ADD COLUMN usuario_id TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE servicos ADD COLUMN usuario_id TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE clientes ADD COLUMN usuario_id TEXT NOT NULL DEFAULT ''`,
+];
+for (const sql of migrations) {
+  try { expo.execSync(sql); } catch { /* coluna já existe */ }
+}
+
 export const db = drizzle(expo, { schema });
