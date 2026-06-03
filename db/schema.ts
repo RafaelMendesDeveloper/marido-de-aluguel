@@ -17,6 +17,7 @@ export const clientes = sqliteTable('clientes', {
   id: text('id').primaryKey().notNull(),
   nome: text('nome').notNull(),
   telefone: text('telefone'),
+  endereco: text('endereco'),
   criado_em: text('criado_em'),
   usuario_id: text('usuario_id')
     .notNull()

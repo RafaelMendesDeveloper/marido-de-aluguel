@@ -21,6 +21,7 @@ expo.execSync(`
     id TEXT PRIMARY KEY NOT NULL,
     nome TEXT NOT NULL,
     telefone TEXT,
+    endereco TEXT,
     criado_em TEXT,
     usuario_id TEXT NOT NULL REFERENCES usuarios(id)
   );
@@ -51,6 +52,7 @@ const migrations = [
   `ALTER TABLE agendamentos ADD COLUMN usuario_id TEXT NOT NULL DEFAULT ''`,
   `ALTER TABLE servicos ADD COLUMN usuario_id TEXT NOT NULL DEFAULT ''`,
   `ALTER TABLE clientes ADD COLUMN usuario_id TEXT NOT NULL DEFAULT ''`,
+  `ALTER TABLE clientes ADD COLUMN endereco TEXT`,
 ];
 for (const sql of migrations) {
   try { expo.execSync(sql); } catch { /* coluna já existe */ }

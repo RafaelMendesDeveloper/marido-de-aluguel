@@ -86,7 +86,7 @@ export default function NovoServico() {
     const valor = parseInt(valorRaw, 10) / 100;
     if (!query.trim() || valor <= 0) return;
 
-    const cliente = clienteSelecionado ?? createCliente(query.trim(), usuario.id);
+    const cliente = clienteSelecionado ?? createCliente({ nome: query.trim(), usuarioId: usuario.id });
     createServico({ clienteId: cliente.id, usuarioId: usuario.id, valor, pago, observacao });
 
     if (agendamentoId) {

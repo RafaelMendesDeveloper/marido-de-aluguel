@@ -65,7 +65,7 @@ export default function NovoAgendamento() {
 
   function salvar() {
     if (!usuario || !query.trim() || !descricao.trim()) return;
-    const cliente = clienteSelecionado ?? createCliente(query.trim(), usuario.id);
+    const cliente = clienteSelecionado ?? createCliente({ nome: query.trim(), usuarioId: usuario.id });
     createAgendamento({
       clienteId: cliente.id,
       usuarioId: usuario.id,

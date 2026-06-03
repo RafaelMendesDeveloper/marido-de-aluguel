@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import EditarClienteModal from '../../components/EditarClienteModal';
 import EditarServicoModal from '../../components/EditarServicoModal';
 import { C } from '../../constants/theme';
 import {
@@ -28,6 +29,7 @@ export default function ClientePerfil() {
   const [servicos, setServicos] = useState<Servico[]>(() => getClienteServicos(id));
   const [modalVisivel, setModalVisivel] = useState(false);
   const [servicoSelecionado, setServicoSelecionado] = useState<ServicoComCliente | null>(null);
+  const [editarClienteVisivel, setEditarClienteVisivel] = useState(false);
 
   function carregar() {
     setCliente(getClienteById(id));
@@ -56,11 +58,21 @@ export default function ClientePerfil() {
           </View>
           <Text style={styles.nome}>{cliente.nome}</Text>
           {cliente.telefone ? (
-            <View style={styles.telRow}>
+            <View style={styles.infoRow}>
               <Ionicons name="call-outline" size={14} color={C.textSecondary} />
-              <Text style={styles.tel}>{cliente.telefone}</Text>
+              <Text style={styles.infoTexto}>{cliente.telefone}</Text>
             </View>
           ) : null}
+          {cliente.endereco ? (
+            <View style={styles.infoRow}>
+              <Ionicons name="location-outline" size={14} color={C.textSecondary} />
+              <Text style={styles.infoTexto}>{cliente.endereco}</Text>
+            </View>
+          ) : null}
+          <Pressable style={styles.btnEditar} onPress={() => setEditarClienteVisivel(true)}>
+            <Ionicons name="pencil-outline" size={13} color={C.green} />
+            <Text style={styles.btnEditarTexto}>Editar dados</Text>
+          </Pressable>
         </View>
 
         {/* Cards de resumo */}
@@ -105,11 +117,44 @@ export default function ClientePerfil() {
         ))}
       </ScrollView>
 
+      {/* FABs WhatsApp / Maps */}
+      <View style={styles.fabContainer}>
+        {cliente.endereco ? (
+          <Pressable
+            style={[styles.fab, styles.fabMaps]}
+            onPress={() =>
+              Linking.openURL(
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cliente.endereco!)}`
+              )
+            }
+          >
+            <Ionicons name="map" size={24} color="#fff" />
+          </Pressable>
+        ) : null}
+        {cliente.telefone ? (
+          <Pressable
+            style={[styles.fab, styles.fabWhats]}
+            onPress={() =>
+              Linking.openURL(`https://wa.me/${cliente.telefone!.replace(/\D/g, '')}`)
+            }
+          >
+            <Ionicons name="logo-whatsapp" size={24} color="#fff" />
+          </Pressable>
+        ) : null}
+      </View>
+
       <EditarServicoModal
         visivel={modalVisivel}
         servico={servicoSelecionado}
         onFechar={() => { setModalVisivel(false); setServicoSelecionado(null); }}
         onSalvar={() => { setModalVisivel(false); setServicoSelecionado(null); carregar(); }}
+      />
+
+      <EditarClienteModal
+        visivel={editarClienteVisivel}
+        cliente={cliente}
+        onFechar={() => setEditarClienteVisivel(false)}
+        onSalvar={() => { setEditarClienteVisivel(false); carregar(); }}
       />
     </SafeAreaView>
   );
@@ -140,8 +185,21 @@ const styles = StyleSheet.create({
   },
   avatarTexto: { fontSize: 34, fontWeight: '700', color: C.green },
   nome: { fontSize: 24, fontWeight: '700', color: C.textPrimary },
-  telRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 },
-  tel: { fontSize: 15, color: C.textSecondary },
+  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 },
+  infoTexto: { fontSize: 15, color: C.textSecondary, flexShrink: 1 },
+  btnEditar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: C.greenMid,
+    backgroundColor: C.greenLight,
+  },
+  btnEditarTexto: { fontSize: 13, fontWeight: '600', color: C.green },
   cards: { flexDirection: 'row', gap: 12, padding: 16 },
   card: {
     flex: 1,
@@ -199,4 +257,25 @@ const styles = StyleSheet.create({
   badgeTexto: { fontSize: 12, fontWeight: '600' },
   badgeTextoVerde: { color: C.green },
   badgeTextoVermelho: { color: C.red },
+  fabContainer: {
+    position: 'absolute',
+    bottom: 32,
+    right: 20,
+    gap: 12,
+    alignItems: 'center',
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  fabWhats: { backgroundColor: '#25D366' },
+  fabMaps: { backgroundColor: '#4285F4' },
 });

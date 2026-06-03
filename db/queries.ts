@@ -107,16 +107,44 @@ export function getClienteServicos(clienteId: string): Servico[] {
     .all();
 }
 
-export function createCliente(nome: string, usuarioId: string, telefone?: string): Cliente {
+export function getClienteByTelefone(telefone: string, uid: string): Cliente | undefined {
+  return db
+    .select()
+    .from(clientes)
+    .where(and(eq(clientes.telefone, telefone), eq(clientes.usuario_id, uid)))
+    .get();
+}
+
+export function createCliente(params: {
+  nome: string;
+  usuarioId: string;
+  telefone?: string;
+  endereco?: string;
+}): Cliente {
   const novo: Cliente = {
     id: uuid(),
-    nome: nome.trim(),
-    telefone: telefone?.trim() || null,
+    nome: params.nome.trim(),
+    telefone: params.telefone?.trim() || null,
+    endereco: params.endereco?.trim() || null,
     criado_em: agora(),
-    usuario_id: usuarioId,
+    usuario_id: params.usuarioId,
   };
   db.insert(clientes).values(novo).run();
   return novo;
+}
+
+export function updateCliente(
+  id: string,
+  params: { nome: string; telefone?: string; endereco?: string }
+): void {
+  db.update(clientes)
+    .set({
+      nome: params.nome.trim(),
+      telefone: params.telefone?.trim() || null,
+      endereco: params.endereco?.trim() || null,
+    })
+    .where(eq(clientes.id, id))
+    .run();
 }
 
 export function updateClienteNome(id: string, nome: string): void {
