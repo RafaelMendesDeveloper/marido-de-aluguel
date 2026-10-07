@@ -1,4 +1,4 @@
-import { CalendarPlus, CheckCheck, MapPin, MessageCircle, Pencil, Phone, Receipt, Trash2 } from 'lucide-react'
+import { CalendarPlus, CheckCheck, MapPin, MessageCircle, Pencil, Phone, QrCode, Receipt, Trash2 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { excluirCliente } from '../api/clientes'
 import { marcarPagosDoCliente } from '../api/servicos'
@@ -7,7 +7,7 @@ import { mensagemErro, useFeedback } from '../components/Feedback'
 import { Avatar, BadgePago, Botao, CabecalhoCartao, Cartao, Carregando, ErroCarregar, Esqueleto, Vazio, Voltar, cx } from '../components/ui'
 import { useCliente, useInvalidar, useServicosDoCliente } from '../hooks/dados'
 import { dataCurta } from '../lib/datas'
-import { fmtBRL, mensagemCobranca, somar } from '../lib/moeda'
+import { fmtBRL, somar } from '../lib/moeda'
 import { formatarTelefone, linkMaps, linkWhatsApp, soDigitos } from '../lib/telefone'
 
 const acaoCls =
@@ -159,16 +159,13 @@ export function ClientePerfil() {
             <strong className="tabular">{fmtBRL(aReceber)}</strong> em aberto ({pendentes.length} serviço{pendentes.length === 1 ? '' : 's'}).
           </p>
           <div className="flex gap-2">
-            {c.telefone && (
-              <a
-                href={linkWhatsApp(c.telefone, mensagemCobranca(c.nome, aReceber, pendentes.length))}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl whitespace-nowrap bg-[#25d366] px-4 text-sm font-bold text-white hover:brightness-95"
-              >
-                <MessageCircle className="size-4" /> Cobrar
-              </a>
-            )}
+            <button
+              type="button"
+              onClick={() => acoes.cobrar({ clienteId: c.id })}
+              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25d366] px-4 text-sm font-bold whitespace-nowrap text-white hover:brightness-95"
+            >
+              <QrCode className="size-4" /> Cobrar com Pix
+            </button>
             <Botao variante="secundario" onClick={quitar} className="flex-1 whitespace-nowrap">
               <CheckCheck className="size-4" /> Recebi tudo
             </Botao>

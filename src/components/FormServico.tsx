@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { QrCode, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { obterOuCriarCliente } from '../api/clientes'
 import { atualizarServico, criarServico, excluirServico } from '../api/servicos'
@@ -6,6 +6,7 @@ import { useClientes, useInvalidar } from '../hooks/dados'
 import { dataPorExtensoComAno, hojeISO } from '../lib/datas'
 import { vazioParaNull } from '../lib/texto'
 import type { Agendamento, Servico } from '../types'
+import { useAcoes } from './Acoes'
 import { DatasRapidas, TextosRapidos, ValoresRapidos } from './Atalhos'
 import { CampoValor } from './CampoValor'
 import { ClienteAutocomplete, type EscolhaCliente } from './ClienteAutocomplete'
@@ -25,6 +26,7 @@ export function ModalServico({ abertura, onFechar }: { abertura: AberturaServico
 
 function Formulario({ abertura, onFechar }: { abertura: AberturaServico; onFechar: () => void }) {
   const { avisar, confirmar } = useFeedback()
+  const acoes = useAcoes()
   const invalidar = useInvalidar()
   const { data: clientes = [] } = useClientes()
   const editando = abertura.modo === 'editar' ? abertura.servico : null
@@ -87,6 +89,11 @@ function Formulario({ abertura, onFechar }: { abertura: AberturaServico; onFecha
           {editando && (
             <Botao variante="perigoSuave" tamanho="lg" onClick={excluir} aria-label="Excluir serviço" className="px-4">
               <Trash2 className="size-5" />
+            </Botao>
+          )}
+          {editando && !editando.pago && (editando.valor ?? 0) > 0 && (
+            <Botao variante="suave" tamanho="lg" onClick={() => acoes.cobrar({ clienteId: editando.cliente_id, servicoIds: [editando.id] })}>
+              <QrCode className="size-5" /> Cobrar
             </Botao>
           )}
           <Botao tamanho="lg" largo onClick={salvar} disabled={!valido} carregando={salvando}>

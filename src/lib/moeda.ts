@@ -26,13 +26,6 @@ export function somar<T extends { valor: number | null }>(itens: T[]): number {
   return itens.reduce((t, s) => t + (s.valor ?? 0), 0)
 }
 
-/** Mensagem educada de cobrança para o WhatsApp. */
-export function mensagemCobranca(nome: string, total: number, qtd: number): string {
-  const primeiro = nome.trim().split(/\s+/)[0]
-  const servicos = qtd === 1 ? 'do serviço' : `dos ${qtd} serviços`
-  return `Olá, ${primeiro}! Tudo bem? Passando para lembrar do valor de ${fmtBRL(total)} referente ${servicos} que fiz pra você. Pode ser por Pix. Obrigado!`
-}
-
 /** Agrupa serviços não pagos por cliente, maior dívida primeiro. */
 export function devedores<T extends { cliente_id: string; valor: number | null; cliente?: { nome: string; telefone: string | null } | null }>(
   servicos: T[],

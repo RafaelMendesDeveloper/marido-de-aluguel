@@ -6,6 +6,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useAcoes } from '../components/Acoes'
 import { useServicosFrequentes } from '../components/Atalhos'
 import { mensagemErro, useFeedback } from '../components/Feedback'
+import { FormPix } from '../components/FormPix'
 import { Avatar, Botao, CabecalhoPagina, Cartao, Chip, inputCls } from '../components/ui'
 import { useInvalidar } from '../hooks/dados'
 import { PROFISSOES, profissaoPorId } from '../lib/profissoes'
@@ -155,6 +156,23 @@ function ContaConteudo() {
               </form>
             </div>
           </div>
+        </Secao>
+
+        <Secao titulo="Receber por Pix" descricao="Vai no QR Code das cobranças, já com o valor de cada uma.">
+          <FormPix
+            key={JSON.stringify(preferencias.pix)}
+            inicial={preferencias.pix}
+            nomePadrao={perfil?.nome ?? ''}
+            comTeste
+            onSalvar={async (pix) => {
+              try {
+                await salvarPreferencias({ pix })
+                avisar('Chave Pix salva')
+              } catch (e) {
+                avisar(mensagemErro(e), 'erro')
+              }
+            }}
+          />
         </Secao>
 
         <Secao titulo="Clientes" descricao="Traga contatos da agenda do celular ou de um arquivo .vcf.">

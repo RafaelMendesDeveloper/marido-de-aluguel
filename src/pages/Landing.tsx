@@ -9,6 +9,7 @@ import {
   MapPin,
   MessageCircle,
   Play,
+  QrCode,
   Receipt,
   Smartphone,
   Wallet,
@@ -27,7 +28,7 @@ const RECURSOS = [
   { icone: <CalendarCheck />, titulo: 'Agenda que não deixa esquecer', texto: 'Calendário com as visitas do dia, horário e endereço. Visitas atrasadas ficam em destaque.' },
   { icone: <Zap />, titulo: 'Registro em 10 segundos', texto: 'Escolha o cliente, toque no valor, pronto. Atalhos para os serviços que você mais faz.' },
   { icone: <Wallet />, titulo: 'Saiba quem está devendo', texto: 'O total a receber aparece logo na tela inicial, separado por cliente.' },
-  { icone: <MessageCircle />, titulo: 'Cobrança pelo WhatsApp', texto: 'Mensagem educada e pronta, com o valor certo. É só tocar em "Cobrar" e enviar.' },
+  { icone: <QrCode />, titulo: 'Cobrança com Pix', texto: 'Uma imagem com os serviços, o total e o QR Code Pix com o valor. Envie pelo WhatsApp em um toque.' },
   { icone: <BarChart3 />, titulo: 'Financeiro sem planilha', texto: 'Quanto entrou no mês e no ano, média por serviço e seus melhores clientes.' },
   { icone: <Contact />, titulo: 'Clientes na palma da mão', texto: 'Importe da agenda do celular. WhatsApp, ligação e rota no Maps a 1 toque.' },
 ]
@@ -309,11 +310,12 @@ function Cobranca() {
         <div className="relative grid items-center gap-12 lg:grid-cols-2">
           <div>
             <p className="text-sm font-bold tracking-wide text-brand-400">Fim do fiado esquecido</p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Saiba exatamente quem te deve — e cobre em um toque.</h2>
+            <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Saiba quem te deve — e cobre com Pix em um toque.</h2>
             <ul className="mt-8 space-y-4">
               {[
                 'O total a receber aparece logo na tela inicial',
-                'Mensagem de cobrança pronta no WhatsApp, com o valor certo',
+                'Cobrança em imagem com os serviços feitos, as datas e o total',
+                'QR Code e Pix copia e cola já com o valor — o cliente só paga',
                 'Recebeu? Marque como pago e o financeiro se atualiza sozinho',
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3 text-[17px] text-ink-200">

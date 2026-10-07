@@ -85,3 +85,9 @@ export async function marcarPagosDoCliente(clienteId: string): Promise<void> {
   const { error } = await supabase.from('servicos').update({ pago: true }).eq('cliente_id', clienteId).eq('pago', false)
   checar(error)
 }
+
+export async function marcarComoPagos(ids: string[]): Promise<void> {
+  if (!ids.length) return
+  const { error } = await supabase.from('servicos').update({ pago: true }).in('id', ids)
+  checar(error)
+}

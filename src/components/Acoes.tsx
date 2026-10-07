@@ -5,6 +5,7 @@ import { ModalCliente, type AberturaCliente } from './ClienteForm'
 import { ModalAgendamento, type AberturaAgendamento } from './FormAgendamento'
 import { ModalServico, type AberturaServico } from './FormServico'
 import { ModalImportarContatos } from './ImportarContatos'
+import { ModalCobranca, type AberturaCobranca } from './ModalCobranca'
 import { Modal } from './Modal'
 
 type AcoesContextType = {
@@ -16,6 +17,7 @@ type AcoesContextType = {
   novoCliente(onSalvo?: (c: Cliente) => void): void
   editarCliente(c: Cliente): void
   importarContatos(): void
+  cobrar(a: AberturaCobranca): void
   abrirMenuNovo(): void
 }
 
@@ -28,6 +30,7 @@ export function AcoesProvider({ children }: { children: ReactNode }) {
   const [agendamento, setAgendamento] = useState<AberturaAgendamento | null>(null)
   const [cliente, setCliente] = useState<AberturaCliente | null>(null)
   const [importando, setImportando] = useState(false)
+  const [cobranca, setCobranca] = useState<AberturaCobranca | null>(null)
   const [menu, setMenu] = useState(false)
 
   const acoes = useMemo<AcoesContextType>(
@@ -43,13 +46,17 @@ export function AcoesProvider({ children }: { children: ReactNode }) {
       novoCliente: (onSalvo) => setCliente({ onSalvo }),
       editarCliente: (c) => setCliente({ cliente: c }),
       importarContatos: () => setImportando(true),
+      cobrar: (a) => {
+        setServico(null)
+        setCobranca(a)
+      },
       abrirMenuNovo: () => setMenu(true),
     }),
     [],
   )
 
   // Atalhos de teclado (desktop): S = serviço, A = agendar, C = cliente
-  const algumAberto = Boolean(servico || agendamento || cliente || importando || menu)
+  const algumAberto = Boolean(servico || agendamento || cliente || importando || menu || cobranca)
   const teclado = useCallback(
     (e: KeyboardEvent) => {
       if (algumAberto || e.metaKey || e.ctrlKey || e.altKey) return
@@ -81,6 +88,7 @@ export function AcoesProvider({ children }: { children: ReactNode }) {
       <ModalAgendamento abertura={agendamento} onFechar={() => setAgendamento(null)} onIniciar={acoes.iniciarAgendamento} />
       <ModalCliente abertura={cliente} onFechar={() => setCliente(null)} />
       <ModalImportarContatos aberto={importando} onFechar={() => setImportando(false)} />
+      <ModalCobranca abertura={cobranca} onFechar={() => setCobranca(null)} />
       <Modal aberto={menu} onFechar={() => setMenu(false)} titulo="O que você quer fazer?">
         <div className="grid gap-3">
           <ItemMenu icone={<Receipt className="size-6" />} titulo="Registrar serviço" texto="Anote o que fez e quanto cobrou" onClick={escolher(acoes.novoServico)} destaque />

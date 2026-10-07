@@ -4,13 +4,15 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useAcoes } from '../components/Acoes'
 import { mensagemErro, useFeedback } from '../components/Feedback'
+import { FormPix } from '../components/FormPix'
 import { PainelImportacao } from '../components/ImportarContatos'
 import { Botao, Logo, cx, inputCls } from '../components/ui'
 import { useClientes } from '../hooks/dados'
+import { pixCompleto } from '../lib/pix'
 import { PROFISSOES, profissaoPorId } from '../lib/profissoes'
 import { primeiroNome } from '../lib/texto'
 
-const PASSOS = ['Seu trabalho', 'Seus serviços', 'Seus clientes'] as const
+const PASSOS = ['Seu trabalho', 'Seus serviços', 'Receber por Pix', 'Seus clientes'] as const
 
 export function Onboarding() {
   const { perfil, preferencias, salvarPreferencias } = useAuth()
@@ -50,6 +52,10 @@ export function Onboarding() {
       setSalvando(false)
     }
   }
+
+  const temClientes = (clientes.data?.length ?? 0) > 0
+  const rotuloAvancar =
+    passo === 2 ? (pixCompleto(preferencias.pix) ? 'Continuar' : 'Pular por enquanto') : passo === 3 && !temClientes ? 'Pular por enquanto' : 'Continuar'
 
   const sugestoes = [...new Set([...(profissaoPorId(profissao)?.servicos ?? []), ...servicos])]
   const final = passo === PASSOS.length
@@ -153,6 +159,31 @@ export function Onboarding() {
         )}
 
         {passo === 2 && (
+          <Etapa
+            titulo="Como você quer receber?"
+            texto="Cadastre sua chave Pix uma vez. Na hora de cobrar, o Orça! gera uma imagem com os serviços, o total e um QR Code Pix já com o valor — o cliente só aponta a câmera e paga."
+          >
+            <div className="rounded-2xl bg-white p-4 shadow-card sm:p-6">
+              <FormPix
+                inicial={preferencias.pix}
+                nomePadrao={perfil?.nome ?? ''}
+                comTeste
+                rotuloSalvar={pixCompleto(preferencias.pix) ? 'Salvar e continuar' : 'Salvar chave e continuar'}
+                onSalvar={async (pix) => {
+                  try {
+                    await salvarPreferencias({ pix })
+                    setPasso(3)
+                  } catch (e) {
+                    avisar(mensagemErro(e), 'erro')
+                  }
+                }}
+              />
+            </div>
+            <p className="mt-3 text-sm text-ink-500">Seus dados de Pix ficam só na sua conta e aparecem apenas nas cobranças que você enviar.</p>
+          </Etapa>
+        )}
+
+        {passo === 3 && (
           <Etapa titulo="Traga seus clientes" texto="Com os clientes no Orça!, agendar e registrar vira questão de dois toques. Você também pode pular e cadastrar aos poucos.">
             <PainelImportacao />
             {(clientes.data?.length ?? 0) > 0 && (
@@ -198,8 +229,14 @@ export function Onboarding() {
                 <ArrowLeft className="size-5" /> <span className="hidden sm:inline">Voltar</span>
               </Botao>
             )}
-            <Botao tamanho="lg" className="ml-auto min-w-40 flex-1 sm:flex-none" disabled={passo === 0 && !profissao} onClick={() => setPasso((p) => p + 1)}>
-              {passo === 2 ? ((clientes.data?.length ?? 0) > 0 ? 'Continuar' : 'Pular por enquanto') : 'Continuar'} <ArrowRight className="size-5" />
+            <Botao
+              tamanho="lg"
+              variante={passo === 2 && !pixCompleto(preferencias.pix) ? 'secundario' : 'primario'}
+              className="ml-auto min-w-40 flex-1 sm:flex-none"
+              disabled={passo === 0 && !profissao}
+              onClick={() => setPasso((p) => p + 1)}
+            >
+              {rotuloAvancar} <ArrowRight className="size-5" />
             </Botao>
           </div>
         </footer>

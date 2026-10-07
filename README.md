@@ -16,16 +16,17 @@ Multiusuário: cada conta vê só os próprios dados, garantido pelo banco (Row 
 |---|---|
 | Landing | Página de apresentação com mockup do app, recursos, como funciona e dúvidas. |
 | Entrar / Criar conta | Supabase Auth (e-mail + senha), com botão de mostrar senha. |
-| Boas-vindas (onboarding) | 3 passos no primeiro acesso: profissão → serviços frequentes (viram atalhos) → importar clientes. Termina oferecendo agendar ou registrar o primeiro serviço. |
-| Início | Saudação, 4 indicadores (recebido hoje, no mês, **a receber**, visitas hoje), card do **próximo atendimento** (Iniciar, WhatsApp, Rota), agenda e serviços de hoje, **quem está devendo** com botão **Cobrar** (mensagem pronta no WhatsApp). |
+| Boas-vindas (onboarding) | 4 passos no primeiro acesso: profissão → serviços frequentes (viram atalhos) → **chave Pix** (com QR de teste para conferir no app do banco) → importar clientes. Termina oferecendo agendar ou registrar o primeiro serviço. |
+| Início | Saudação, 4 indicadores (recebido hoje, no mês, **a receber**, visitas hoje), card do **próximo atendimento** (Iniciar, WhatsApp, Rota), agenda e serviços de hoje, **quem está devendo** com botão **Cobrar**. |
+| Cobrar | Escolha os serviços em aberto do cliente e o Orça! gera uma **imagem de cobrança** (serviços, datas, total e **QR Code Pix já com o valor**) mais a mensagem com o **Pix copia e cola**. No celular: compartilhar direto para o WhatsApp. No computador: abrir o WhatsApp com a mensagem e copiar/baixar a imagem. Botão "Já recebi" marca tudo como pago. O QR segue o padrão BR Code do Banco Central (Pix estático com valor). |
 | Agenda | Calendário (semana começa na segunda), visitas do dia com **Iniciar**, próximas visitas, atrasadas em destaque; editar, remarcar, cancelar (com confirmação) e excluir. |
 | Registrar serviço / Agendar | Autocomplete de cliente (cria se não existir e reaproveita nome igual), **atalhos** de valor (R$ 50…300), dia (Hoje, Amanhã, próximos dias), horário e serviços frequentes. Ao iniciar uma visita, cliente e descrição já vêm preenchidos e a visita é concluída na mesma transação. |
 | Clientes | Lista com busca **sem acento** e perfil ao lado (desktop). Perfil: WhatsApp, ligar, rota, já pagou / a receber, **Cobrar** e **Recebi tudo**, histórico. Importação pela agenda do celular, arquivo **.vcf** ou lista digitada. |
 | Histórico | Filtros Hoje / Semana / Mês / **A receber** / Tudo (paginado), busca por cliente ou serviço, totais do filtro, agrupado por dia. |
 | Financeiro | Mês ou ano, indicadores, gráfico de recebido, melhores clientes, últimos serviços. No celular, divide a aba "Finanças" com o Histórico. |
-| Minha conta | Nome, profissão e serviços frequentes, importar contatos, sair, apagar todos os dados (exige digitar `APAGAR`). |
+| Minha conta | Nome, chave Pix, profissão e serviços frequentes, importar contatos, sair, apagar todos os dados (exige digitar `APAGAR`). |
 
-Profissão, serviços frequentes e o status do onboarding ficam no `user_metadata` do Supabase Auth — não exigem tabela nova.
+Profissão, serviços frequentes, chave Pix e o status do onboarding ficam no `user_metadata` do Supabase Auth — não exigem tabela nova.
 
 Os bugs do app antigo listados na seção 11 da especificação foram corrigidos (datas em fuso local, senha com hash via Supabase Auth, WhatsApp sem DDI, cliente duplicado, etc.).
 

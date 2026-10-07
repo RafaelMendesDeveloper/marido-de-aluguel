@@ -1,5 +1,5 @@
 import { addDays } from 'date-fns'
-import { AlertTriangle, CalendarClock, CalendarDays, ChevronRight, Clock, MapPin, MessageCircle, Play, Receipt, TrendingUp, Upload, UserPlus, Wallet } from 'lucide-react'
+import { AlertTriangle, CalendarClock, CalendarDays, ChevronRight, Clock, MapPin, MessageCircle, Play, QrCode, Receipt, TrendingUp, Upload, UserPlus, Wallet } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
@@ -8,7 +8,7 @@ import { ItemAgendamento, ItemServico } from '../components/Itens'
 import { Avatar, Botao, CabecalhoCartao, CabecalhoPagina, Cartao, ErroCarregar, Esqueleto, Indicador, LinkCartao, Vazio } from '../components/ui'
 import { useAgendados, useAReceber, useClientes, useServicos } from '../hooks/dados'
 import { dataPorExtenso, deISO, hojeISO, horaCurta, intervaloMes, paraISO } from '../lib/datas'
-import { devedores, fmtBRL, fmtBRLInteiro, mensagemCobranca, somar } from '../lib/moeda'
+import { devedores, fmtBRL, fmtBRLInteiro, somar } from '../lib/moeda'
 import { linkMaps, linkWhatsApp } from '../lib/telefone'
 import { primeiroNome } from '../lib/texto'
 import type { Agendamento } from '../types'
@@ -206,20 +206,13 @@ export function Inicio() {
                           </span>
                         </span>
                       </Link>
-                      {d.telefone ? (
-                        <a
-                          href={linkWhatsApp(d.telefone, mensagemCobranca(d.nome, d.total, d.qtd))}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#25d366]/12 px-3 text-sm font-bold text-[#128c4a] hover:bg-[#25d366]/20"
-                        >
-                          <MessageCircle className="size-4" /> Cobrar
-                        </a>
-                      ) : (
-                        <Link to={`/clientes/${d.clienteId}`} className="text-xs font-semibold text-ink-400 hover:text-ink-600">
-                          sem telefone
-                        </Link>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => acoes.cobrar({ clienteId: d.clienteId })}
+                        className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#25d366]/12 px-3 text-sm font-bold text-[#128c4a] hover:bg-[#25d366]/20"
+                      >
+                        <QrCode className="size-4" /> Cobrar
+                      </button>
                     </li>
                   ))}
                 </ul>

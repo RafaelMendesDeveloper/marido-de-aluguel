@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/react-query'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import type { DadosPix } from '../lib/pix'
 import { supabase } from '../lib/supabase'
 import type { Perfil } from '../types'
 
@@ -8,6 +9,7 @@ export type Preferencias = {
   profissao: string | null
   servicosFrequentes: string[]
   onboardingConcluido: boolean
+  pix: DadosPix | null
 }
 
 type Resultado = { ok: true; aguardandoConfirmacao?: boolean } | { ok: false; erro: string }
@@ -110,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profissao: (meta?.profissao as string | undefined) ?? null,
       servicosFrequentes: Array.isArray(meta?.servicos_frequentes) ? (meta.servicos_frequentes as string[]) : [],
       onboardingConcluido: Boolean(meta?.onboarding_concluido),
+      pix: meta?.pix && typeof meta.pix === 'object' ? (meta.pix as DadosPix) : null,
     }),
     [meta],
   )
@@ -120,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (p.profissao !== undefined) data.profissao = p.profissao
     if (p.servicosFrequentes !== undefined) data.servicos_frequentes = p.servicosFrequentes
     if (p.onboardingConcluido !== undefined) data.onboarding_concluido = p.onboardingConcluido
+    if (p.pix !== undefined) data.pix = p.pix
     const { data: r, error } = await supabase.auth.updateUser({ data })
     if (error) throw new Error(error.message)
     // Atualiza já, sem esperar o evento USER_UPDATED.

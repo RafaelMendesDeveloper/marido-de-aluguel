@@ -11,7 +11,7 @@ type Props = {
   children: ReactNode
   /** Ações fixas no rodapé (sempre visíveis acima do teclado/rolagem). */
   rodape?: ReactNode
-  largura?: 'md' | 'lg'
+  largura?: 'md' | 'lg' | 'xl'
 }
 
 /** Gaveta inferior no celular; janela centralizada a partir de `sm`. */
@@ -40,7 +40,7 @@ export function Modal({ aberto, titulo, subtitulo, onFechar, children, rodape, l
       <div
         className={cx(
           'relative flex max-h-[94dvh] w-full animate-subir flex-col rounded-t-3xl bg-white shadow-2xl sm:max-h-[88dvh] sm:animate-surgir sm:rounded-3xl',
-          largura === 'lg' ? 'sm:max-w-2xl' : 'sm:max-w-lg',
+          largura === 'xl' ? 'sm:max-w-4xl' : largura === 'lg' ? 'sm:max-w-2xl' : 'sm:max-w-lg',
         )}
       >
         <div className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-ink-200 sm:hidden" />
