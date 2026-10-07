@@ -1,49 +1,52 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
-import { TabBar } from './components/TabBar'
-import { Carregando } from './components/ui'
+import { AcoesProvider } from './components/Acoes'
+import { AppShell } from './components/AppShell'
+import { LogoMarca } from './components/ui'
 import { supabaseConfigurado } from './lib/supabase'
 import { Agenda } from './pages/Agenda'
-import { Cadastro, Landing, Login } from './pages/Auth'
+import { Cadastro, Login } from './pages/Auth'
 import { ClientePerfil } from './pages/ClientePerfil'
-import { Clientes } from './pages/Clientes'
+import { ClienteNenhumSelecionado, ClientesLayout } from './pages/Clientes'
 import { ConfiguracaoPendente } from './pages/ConfiguracaoPendente'
 import { Conta } from './pages/Conta'
 import { Financeiro } from './pages/Financeiro'
 import { Historico } from './pages/Historico'
 import { Inicio } from './pages/Inicio'
-import { NovoAgendamento } from './pages/NovoAgendamento'
-import { NovoServico } from './pages/NovoServico'
+import { Landing } from './pages/Landing'
+import { Onboarding } from './pages/Onboarding'
 
-/** Rotas que exigem login; quem não está logado vai para a landing. */
+function Abertura() {
+  return (
+    <div className="flex min-h-dvh items-center justify-center" role="status" aria-label="Carregando">
+      <LogoMarca className="size-14 animate-pulse" />
+    </div>
+  )
+}
+
+/** Logado: ações globais + rotas internas. Visitante: landing na raiz, login no resto. */
 function Protegido() {
   const { session, carregando } = useAuth()
-  if (carregando) return <Carregando />
-  return session ? <Outlet /> : <Navigate to="/bem-vindo" replace />
+  const { pathname } = useLocation()
+  if (carregando) return <Abertura />
+  if (!session) return pathname === '/' ? <Landing /> : <Navigate to="/entrar" replace />
+  return (
+    <AcoesProvider>
+      <Outlet />
+    </AcoesProvider>
+  )
 }
 
-/** Landing/login/cadastro: quem já está logado vai para o Início. */
+/** Primeiro acesso passa pelas boas-vindas. */
+function ExigeOnboarding() {
+  const { preferencias } = useAuth()
+  return preferencias.onboardingConcluido ? <AppShell /> : <Navigate to="/boas-vindas" replace />
+}
+
 function SoVisitante() {
   const { session, carregando } = useAuth()
-  if (carregando) return <Carregando />
+  if (carregando) return <Abertura />
   return session ? <Navigate to="/" replace /> : <Outlet />
-}
-
-function ComAbas() {
-  return (
-    <div className="mx-auto min-h-dvh max-w-md bg-gray-50 pb-[calc(4rem+env(safe-area-inset-bottom))]">
-      <Outlet />
-      <TabBar />
-    </div>
-  )
-}
-
-function SemAbas() {
-  return (
-    <div className="mx-auto min-h-dvh max-w-md bg-white">
-      <Outlet />
-    </div>
-  )
 }
 
 export default function App() {
@@ -51,23 +54,21 @@ export default function App() {
   return (
     <Routes>
       <Route element={<SoVisitante />}>
-        <Route path="/bem-vindo" element={<Landing />} />
         <Route path="/entrar" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
       </Route>
       <Route element={<Protegido />}>
-        <Route element={<ComAbas />}>
+        <Route path="/boas-vindas" element={<Onboarding />} />
+        <Route element={<ExigeOnboarding />}>
           <Route index element={<Inicio />} />
           <Route path="/agenda" element={<Agenda />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/clientes/:id" element={<ClientePerfil />} />
+          <Route path="/clientes" element={<ClientesLayout />}>
+            <Route index element={<ClienteNenhumSelecionado />} />
+            <Route path=":id" element={<ClientePerfil />} />
+          </Route>
           <Route path="/historico" element={<Historico />} />
           <Route path="/financeiro" element={<Financeiro />} />
           <Route path="/conta" element={<Conta />} />
-        </Route>
-        <Route element={<SemAbas />}>
-          <Route path="/servicos/novo" element={<NovoServico />} />
-          <Route path="/agendamentos/novo" element={<NovoAgendamento />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,66 +1,76 @@
-import { ChevronLeft, MailCheck } from 'lucide-react'
+import { Check, Eye, EyeOff, MailCheck } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { Botao, Campo, inputCls } from '../components/ui'
+import { Botao, Campo, Logo, cx, inputCls } from '../components/ui'
 
-const RECURSOS = [
-  { icone: '🗓️', titulo: 'Controle sua agenda', texto: 'De maneira rápida, organize seus serviços' },
-  { icone: '📊', titulo: 'Controle financeiro', texto: 'Acompanhe suas finanças de forma prática e eficiente' },
-  { icone: '⏰', titulo: 'Economia de tempo', texto: 'Realize suas tarefas de forma mais rápida e eficiente' },
-]
-
-function Tela({ children }: { children: ReactNode }) {
+function LayoutAuth({ children }: { children: ReactNode }) {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-white px-6 pt-[calc(env(safe-area-inset-top)+1.5rem)] pb-[calc(env(safe-area-inset-bottom)+1.5rem)]">
-      {children}
-    </main>
+    <div className="grid min-h-dvh bg-white lg:grid-cols-2">
+      <main className="flex flex-col px-5 pt-[calc(env(safe-area-inset-top)+1.25rem)] pb-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:px-10">
+        <Link to="/" className="w-fit">
+          <Logo />
+        </Link>
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">{children}</div>
+      </main>
+      <aside className="relative hidden overflow-hidden bg-ink-950 lg:block">
+        <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_70%_20%,rgb(34_197_94/0.35),transparent_70%),radial-gradient(50%_50%_at_10%_90%,rgb(16_185_129/0.25),transparent_70%)]" />
+        <div className="relative flex h-full flex-col justify-center px-14 xl:px-20">
+          <p className="text-sm font-bold tracking-wide text-brand-400">Orça!</p>
+          <h2 className="mt-3 max-w-md text-4xl leading-tight font-extrabold tracking-tight text-white">Tempo é dinheiro. Economize os dois.</h2>
+          <ul className="mt-10 space-y-5">
+            {[
+              ['Agenda do dia', 'Visitas com horário, endereço e rota no Maps.'],
+              ['Registro em segundos', 'Cliente, valor, pago ou a receber. Pronto.'],
+              ['Cobrança sem constrangimento', 'Mensagem pronta no WhatsApp com o valor certo.'],
+            ].map(([t, d]) => (
+              <li key={t} className="flex gap-3">
+                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-brand-400">
+                  <Check className="size-4" strokeWidth={3} />
+                </span>
+                <span>
+                  <span className="block font-bold text-white">{t}</span>
+                  <span className="block text-ink-300">{d}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
+    </div>
   )
 }
 
-export function Landing() {
-  const navigate = useNavigate()
+function CampoSenha({ valor, onChange, novo }: { valor: string; onChange: (v: string) => void; novo?: boolean }) {
+  const [visivel, setVisivel] = useState(false)
   return (
-    <Tela>
-      <div className="flex flex-1 flex-col justify-center">
-        <h1 className="text-5xl font-extrabold tracking-tight text-gray-900">Orça! 💸</h1>
-        <p className="mt-2 text-lg text-gray-500">Tempo é dinheiro, economize com Orça!</p>
-
-        <ul className="mt-10 space-y-4">
-          {RECURSOS.map((r) => (
-            <li key={r.titulo} className="flex items-center gap-4">
-              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-green-100 text-2xl">{r.icone}</span>
-              <span>
-                <span className="block text-[17px] font-bold text-gray-900">{r.titulo}</span>
-                <span className="block text-sm text-gray-500">{r.texto}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="my-10 flex items-center gap-3 text-xs font-bold tracking-widest text-gray-400">
-          <span className="h-px flex-1 bg-gray-200" />
-          COMECE AGORA
-          <span className="h-px flex-1 bg-gray-200" />
-        </div>
-
-        <div className="space-y-3">
-          <Botao onClick={() => navigate('/cadastro')}>Criar conta grátis</Botao>
-          <Botao variante="secundario" onClick={() => navigate('/entrar')}>
-            Já tenho conta — Entrar
-          </Botao>
-        </div>
-      </div>
-    </Tela>
+    <div className="relative">
+      <input
+        className={cx(inputCls, 'pr-12')}
+        type={visivel ? 'text' : 'password'}
+        autoComplete={novo ? 'new-password' : 'current-password'}
+        value={valor}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={novo ? 'Mínimo 6 caracteres' : 'Sua senha'}
+      />
+      <button
+        type="button"
+        onClick={() => setVisivel((v) => !v)}
+        aria-label={visivel ? 'Esconder senha' : 'Mostrar senha'}
+        className="absolute top-1/2 right-1.5 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-ink-400 hover:bg-ink-100 hover:text-ink-700"
+      >
+        {visivel ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+      </button>
+    </div>
   )
 }
 
-function Voltar() {
-  return (
-    <Link to="/bem-vindo" className="-ml-2 flex min-h-11 w-fit items-center gap-1 pr-3 font-semibold text-green-600">
-      <ChevronLeft className="size-5" /> Voltar
-    </Link>
-  )
+function Erro({ texto }: { texto: string }) {
+  return texto ? (
+    <p className="rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-700" role="alert">
+      {texto}
+    </p>
+  ) : null
 }
 
 export function Login() {
@@ -81,29 +91,28 @@ export function Login() {
   }
 
   return (
-    <Tela>
-      <Voltar />
-      <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Entrar</h1>
-      <p className="mt-1 text-gray-500">Acesse sua conta Orça!</p>
+    <LayoutAuth>
+      <h1 className="text-3xl font-extrabold tracking-tight text-ink-950">Bem-vindo de volta</h1>
+      <p className="mt-2 text-ink-500">Entre para ver sua agenda e seus números.</p>
       <form onSubmit={enviar} className="mt-8 space-y-4" noValidate>
         <Campo label="E-mail">
-          <input className={inputCls} type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@email.com" />
+          <input className={inputCls} type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@email.com" autoFocus />
         </Campo>
         <Campo label="Senha">
-          <input className={inputCls} type="password" autoComplete="current-password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Sua senha" />
+          <CampoSenha valor={senha} onChange={setSenha} />
         </Campo>
-        {erro && <p className="text-sm font-semibold text-red-600" role="alert">{erro}</p>}
-        <Botao type="submit" carregando={enviando}>
+        <Erro texto={erro} />
+        <Botao type="submit" tamanho="lg" largo carregando={enviando}>
           Entrar
         </Botao>
       </form>
-      <p className="mt-6 text-center text-gray-500">
-        Não tem conta?{' '}
-        <Link to="/cadastro" className="font-bold text-green-600">
+      <p className="mt-8 text-center text-ink-500">
+        Ainda não tem conta?{' '}
+        <Link to="/cadastro" className="font-bold text-brand-700 hover:underline">
           Criar conta grátis
         </Link>
       </p>
-    </Tela>
+    </LayoutAuth>
   )
 }
 
@@ -113,7 +122,6 @@ export function Cadastro() {
   const [nome, setNome] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
-  const [confirmacao, setConfirmacao] = useState('')
   const [erro, setErro] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [confirmarEmail, setConfirmarEmail] = useState(false)
@@ -124,7 +132,6 @@ export function Cadastro() {
     if (!nome.trim()) return setErro('Informe seu nome.')
     if (!email.trim()) return setErro('Informe seu e-mail.')
     if (senha.length < 6) return setErro('A senha deve ter pelo menos 6 caracteres.')
-    if (senha !== confirmacao) return setErro('As senhas não coincidem.')
     setEnviando(true)
     const r = await cadastrar(nome, email, senha)
     setEnviando(false)
@@ -134,52 +141,46 @@ export function Cadastro() {
 
   if (confirmarEmail) {
     return (
-      <Tela>
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <span className="flex size-20 items-center justify-center rounded-full bg-green-100 text-green-600">
-            <MailCheck className="size-10" />
-          </span>
-          <h1 className="mt-6 text-2xl font-extrabold text-gray-900">Confirme seu e-mail</h1>
-          <p className="mt-2 text-gray-500">
-            Enviamos um link para <strong className="text-gray-900">{email.trim().toLowerCase()}</strong>. Abra-o para ativar a conta e depois entre.
-          </p>
-          <Botao className="mt-8" onClick={() => navigate('/entrar')}>
-            Ir para o login
-          </Botao>
-        </div>
-      </Tela>
+      <LayoutAuth>
+        <span className="flex size-16 items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
+          <MailCheck className="size-8" />
+        </span>
+        <h1 className="mt-6 text-3xl font-extrabold tracking-tight text-ink-950">Confirme seu e-mail</h1>
+        <p className="mt-2 text-ink-500">
+          Enviamos um link para <strong className="text-ink-900">{email.trim().toLowerCase()}</strong>. Abra-o para ativar a conta e depois entre.
+        </p>
+        <Botao className="mt-8" tamanho="lg" largo onClick={() => navigate('/entrar')}>
+          Ir para o login
+        </Botao>
+      </LayoutAuth>
     )
   }
 
   return (
-    <Tela>
-      <Voltar />
-      <h1 className="mt-6 text-3xl font-extrabold text-gray-900">Criar conta</h1>
-      <p className="mt-1 text-gray-500">Comece a usar o Orça! gratuitamente</p>
+    <LayoutAuth>
+      <h1 className="text-3xl font-extrabold tracking-tight text-ink-950">Crie sua conta grátis</h1>
+      <p className="mt-2 text-ink-500">Leva menos de um minuto. Sem cartão.</p>
       <form onSubmit={enviar} className="mt-8 space-y-4" noValidate>
-        <Campo label="Nome">
-          <input className={inputCls} autoComplete="name" autoCapitalize="words" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" />
+        <Campo label="Seu nome">
+          <input className={inputCls} autoComplete="name" autoCapitalize="words" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Como quer ser chamado" autoFocus />
         </Campo>
         <Campo label="E-mail">
           <input className={inputCls} type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="voce@email.com" />
         </Campo>
         <Campo label="Senha">
-          <input className={inputCls} type="password" autoComplete="new-password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" />
+          <CampoSenha valor={senha} onChange={setSenha} novo />
         </Campo>
-        <Campo label="Confirmar senha">
-          <input className={inputCls} type="password" autoComplete="new-password" value={confirmacao} onChange={(e) => setConfirmacao(e.target.value)} placeholder="Repita a senha" />
-        </Campo>
-        {erro && <p className="text-sm font-semibold text-red-600" role="alert">{erro}</p>}
-        <Botao type="submit" carregando={enviando}>
+        <Erro texto={erro} />
+        <Botao type="submit" tamanho="lg" largo carregando={enviando}>
           Criar conta
         </Botao>
       </form>
-      <p className="mt-6 text-center text-gray-500">
+      <p className="mt-8 text-center text-ink-500">
         Já tem conta?{' '}
-        <Link to="/entrar" className="font-bold text-green-600">
+        <Link to="/entrar" className="font-bold text-brand-700 hover:underline">
           Entrar
         </Link>
       </p>
-    </Tela>
+    </LayoutAuth>
   )
 }

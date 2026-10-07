@@ -1,7 +1,7 @@
 export function ConfiguracaoPendente() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
-      <h1 className="text-4xl font-extrabold text-gray-900">Orça! 💸</h1>
+      <h1 className="text-4xl font-extrabold text-ink-900">Orça! 💸</h1>
       <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
         <p className="font-bold">Configuração pendente</p>
         <p className="mt-2 text-sm">

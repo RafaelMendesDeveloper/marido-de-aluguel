@@ -1,10 +1,12 @@
 import { BarChart3, CheckCircle2, ChevronLeft, ChevronRight, Clock, Wrench } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
-import { EditarServicoSheet } from '../components/EditarServicoSheet'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { AbasFinancas } from '../components/AbasFinancas'
+import { useAcoes } from '../components/Acoes'
 import { GraficoBarras } from '../components/GraficoBarras'
-import { BadgePago, CabecalhoPagina, Cartao, ErroCarregar, Esqueleto, TituloSecao, Vazio } from '../components/ui'
+import { Avatar, BadgePago, CabecalhoCartao, CabecalhoPagina, Cartao, ErroCarregar, Esqueleto, Indicador, Segmentado, Vazio, cx } from '../components/ui'
 import { useServicos } from '../hooks/dados'
-import { dataDiaMes, deISO, intervaloAno, intervaloMes, mesAnoCurto } from '../lib/datas'
+import { dataDiaMes, deISO, intervaloAno, intervaloMes, mesAno } from '../lib/datas'
 import { fmtBRL, somar } from '../lib/moeda'
 import type { Servico } from '../types'
 
@@ -24,11 +26,11 @@ function topClientes(servicos: Servico[], limite = 5): TopCliente[] {
 }
 
 export function Financeiro() {
+  const acoes = useAcoes()
   const [agora] = useState(() => new Date())
   const [modo, setModo] = useState<'mes' | 'ano'>('mes')
   const [ano, setAno] = useState(agora.getFullYear())
   const [mes, setMes] = useState(agora.getMonth() + 1)
-  const [editando, setEditando] = useState<Servico | null>(null)
 
   const consulta = useServicos(modo === 'mes' ? intervaloMes(ano, mes) : intervaloAno(ano))
   const servicos = useMemo(() => consulta.data ?? [], [consulta.data])
@@ -54,125 +56,118 @@ export function Financeiro() {
     // Semanas fixas: 1–7, 8–14, 15–21, 22–fim
     const totais = [0, 0, 0, 0]
     for (const s of pagos) totais[Math.min(3, Math.floor((deISO(s.data).getDate() - 1) / 7))] += s.valor ?? 0
-    return totais.map((valor, i) => ({ rotulo: `S${i + 1}`, valor }))
+    return totais.map((valor, i) => ({ rotulo: `Sem. ${i + 1}`, valor }))
   }, [servicos, modo])
 
   const top = useMemo(() => topClientes(servicos), [servicos])
-
-  const cards: { rotulo: string; valor: string; icone: ReactNode; cor: string }[] = [
-    { rotulo: 'Recebido', valor: fmtBRL(recebido), icone: <CheckCircle2 className="size-5" />, cor: 'border-green-200 bg-green-50 text-green-700 [&_strong]:text-green-800' },
-    { rotulo: 'Pendente', valor: fmtBRL(pendente), icone: <Clock className="size-5" />, cor: 'border-red-200 bg-red-50 text-red-600 [&_strong]:text-red-700' },
-    { rotulo: 'Serviços', valor: String(servicos.length), icone: <Wrench className="size-5" />, cor: 'border-gray-200 bg-white text-gray-500 [&_strong]:text-gray-900' },
-    { rotulo: 'Média/serv.', valor: fmtBRL(media), icone: <BarChart3 className="size-5" />, cor: 'border-gray-200 bg-white text-gray-500 [&_strong]:text-gray-900' },
-  ]
+  const carregando = consulta.isPending
 
   return (
-    <div>
-      <CabecalhoPagina titulo="Financeiro">
-        <div className="mt-4 flex items-center gap-2">
-          <button type="button" aria-label="Período anterior" onClick={() => mover(-1)} className="flex size-11 items-center justify-center rounded-full bg-gray-100 text-gray-700 active:bg-gray-200">
-            <ChevronLeft className="size-5" />
-          </button>
-          <span className="flex-1 text-center text-lg font-bold text-gray-900">{modo === 'mes' ? mesAnoCurto(ano, mes) : ano}</span>
-          <button type="button" aria-label="Próximo período" onClick={() => mover(1)} className="flex size-11 items-center justify-center rounded-full bg-gray-100 text-gray-700 active:bg-gray-200">
-            <ChevronRight className="size-5" />
-          </button>
-          <div className="ml-1 flex rounded-full bg-gray-100 p-1" role="tablist">
-            {(['mes', 'ano'] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="tab"
-                aria-selected={modo === m}
-                onClick={() => setModo(m)}
-                className={`min-h-9 rounded-full px-3.5 text-sm font-bold ${modo === m ? 'bg-green-600 text-white' : 'text-gray-500'}`}
-              >
-                {m === 'mes' ? 'Mês' : 'Ano'}
+    <>
+      <CabecalhoPagina
+        titulo="Financeiro"
+        subtitulo="Quanto entrou, quanto falta e quem são seus melhores clientes."
+        acoes={
+          <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-xl border border-ink-200 bg-white shadow-card">
+              <button type="button" aria-label="Período anterior" onClick={() => mover(-1)} className="flex size-10 items-center justify-center rounded-l-xl text-ink-600 hover:bg-ink-50">
+                <ChevronLeft className="size-5" />
               </button>
-            ))}
+              <span className="min-w-32 px-2 text-center text-[15px] font-bold text-ink-900">{modo === 'mes' ? mesAno(ano, mes) : ano}</span>
+              <button type="button" aria-label="Próximo período" onClick={() => mover(1)} className="flex size-10 items-center justify-center rounded-r-xl text-ink-600 hover:bg-ink-50">
+                <ChevronRight className="size-5" />
+              </button>
+            </div>
+            <Segmentado
+              valor={modo}
+              onChange={setModo}
+              opcoes={[
+                { id: 'mes', rotulo: 'Mês' },
+                { id: 'ano', rotulo: 'Ano' },
+              ]}
+            />
           </div>
-        </div>
+        }
+      >
+        <AbasFinancas />
       </CabecalhoPagina>
 
-      <div className="space-y-4 p-4">
-        {consulta.isError ? (
-          <ErroCarregar erro={consulta.error} tentar={() => consulta.refetch()} />
-        ) : (
-          <>
-            <div className="grid grid-cols-2 gap-3">
-              {cards.map((c) => (
-                <div key={c.rotulo} className={`rounded-2xl border p-4 ${c.cor}`}>
-                  <div className="flex items-center gap-1.5">
-                    {c.icone}
-                    <span className="text-[11px] font-bold tracking-wider uppercase">{c.rotulo}</span>
-                  </div>
-                  <strong className="mt-1.5 block text-xl font-extrabold tracking-tight">
-                    {consulta.isPending ? <span className="inline-block h-6 w-20 animate-pulse rounded bg-gray-200/60" /> : c.valor}
-                  </strong>
-                </div>
-              ))}
-            </div>
+      {consulta.isError ? (
+        <ErroCarregar erro={consulta.error} tentar={() => consulta.refetch()} />
+      ) : (
+        <div className="space-y-5 lg:space-y-6">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+            <Indicador rotulo="Recebido" tom="verde" icone={<CheckCircle2 />} valor={fmtBRL(recebido)} carregando={carregando} />
+            <Indicador rotulo="A receber" tom="ambar" icone={<Clock />} valor={fmtBRL(pendente)} carregando={carregando} />
+            <Indicador rotulo="Serviços" icone={<Wrench />} valor={servicos.length} carregando={carregando} />
+            <Indicador rotulo="Média por serviço" icone={<BarChart3 />} valor={fmtBRL(media)} carregando={carregando} />
+          </div>
 
-            <Cartao>
-              <TituloSecao>{modo === 'mes' ? 'Receita por semana' : 'Receita por mês'}</TituloSecao>
-              <div className="px-3 pb-4">{consulta.isPending ? <Esqueleto linhas={2} /> : <GraficoBarras itens={barras} />}</div>
+          <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
+            <Cartao className="flex flex-col lg:col-span-2">
+              <CabecalhoCartao titulo={modo === 'mes' ? 'Recebido por semana' : 'Recebido por mês'} />
+              <div className="flex flex-1 flex-col justify-end px-5 pb-5">{carregando ? <Esqueleto linhas={3} /> : <GraficoBarras itens={barras} />}</div>
             </Cartao>
 
             <Cartao>
-              <TituloSecao>Top clientes</TituloSecao>
-              {consulta.isPending ? (
+              <CabecalhoCartao titulo="Melhores clientes" />
+              {carregando ? (
                 <Esqueleto />
               ) : top.length === 0 ? (
                 <Vazio titulo="Sem serviços no período" />
               ) : (
-                <ol className="space-y-4 px-4 pb-4">
+                <ol className="space-y-4 px-5 pb-5">
                   {top.map((t, i) => (
-                    <li key={t.id} className="flex items-center gap-3">
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-700">{i + 1}</span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className="truncate font-semibold text-gray-900">{t.nome}</span>
-                          <span className="shrink-0 font-bold text-gray-900">{fmtBRL(t.total)}</span>
+                    <li key={t.id}>
+                      <Link to={`/clientes/${t.id}`} className="group flex items-center gap-3">
+                        <span className="w-4 text-center text-sm font-bold text-ink-400">{i + 1}</span>
+                        <Avatar nome={t.nome} tamanho="sm" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-baseline justify-between gap-2">
+                            <span className="truncate text-sm font-semibold text-ink-900 group-hover:underline">{t.nome}</span>
+                            <span className="tabular shrink-0 text-sm font-bold text-ink-900">{fmtBRL(t.total)}</span>
+                          </div>
+                          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-ink-100">
+                            <div className="h-full rounded-full bg-brand-500" style={{ width: `${top[0].total ? (t.total / top[0].total) * 100 : 0}%` }} />
+                          </div>
+                          <span className="mt-1 block text-xs text-ink-500">
+                            {t.qtd} serviço{t.qtd === 1 ? '' : 's'}
+                          </span>
                         </div>
-                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-gray-100">
-                          <div className="h-full rounded-full bg-green-600" style={{ width: `${top[0].total ? (t.total / top[0].total) * 100 : 0}%` }} />
-                        </div>
-                        <span className="mt-1 block text-xs text-gray-500">
-                          {t.qtd} serviço{t.qtd === 1 ? '' : 's'}
-                        </span>
-                      </div>
+                      </Link>
                     </li>
                   ))}
                 </ol>
               )}
             </Cartao>
+          </div>
 
-            <Cartao>
-              <TituloSecao>Últimos serviços</TituloSecao>
-              {consulta.isPending ? (
-                <Esqueleto />
-              ) : servicos.length === 0 ? (
-                <Vazio titulo="Sem serviços no período" />
-              ) : (
-                <ul className="divide-y divide-gray-100 pb-1">
-                  {servicos.slice(0, 8).map((s) => (
-                    <li key={s.id}>
-                      <button type="button" onClick={() => setEditando(s)} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-gray-50">
-                        <span className="w-12 shrink-0 text-sm font-semibold text-gray-500">{dataDiaMes(s.data)}</span>
-                        <span className="min-w-0 flex-1 truncate font-semibold text-gray-900">{s.cliente?.nome}</span>
-                        <span className={`shrink-0 font-bold ${s.pago ? 'text-green-800' : 'text-red-600'}`}>{s.valor == null ? '—' : fmtBRL(s.valor)}</span>
-                        <BadgePago pago={s.pago} curto />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Cartao>
-          </>
-        )}
-      </div>
-
-      <EditarServicoSheet servico={editando} onFechar={() => setEditando(null)} />
-    </div>
+          <Cartao>
+            <CabecalhoCartao titulo="Últimos serviços do período" />
+            {carregando ? (
+              <Esqueleto />
+            ) : servicos.length === 0 ? (
+              <Vazio titulo="Sem serviços no período" />
+            ) : (
+              <ul className="divide-y divide-ink-100 pb-2">
+                {servicos.slice(0, 8).map((s) => (
+                  <li key={s.id}>
+                    <button type="button" onClick={() => acoes.editarServico(s)} className="flex w-full items-center gap-4 px-5 py-3 text-left hover:bg-ink-50">
+                      <span className="w-14 shrink-0 text-sm font-semibold text-ink-500">{dataDiaMes(s.data)}</span>
+                      <span className="min-w-0 flex-1 truncate font-semibold text-ink-900">{s.cliente?.nome}</span>
+                      <span className="hidden min-w-0 flex-1 truncate text-sm text-ink-500 md:block">{s.observacao}</span>
+                      <span className={cx('tabular shrink-0 font-bold', s.pago ? 'text-ink-900' : 'text-amber-700')}>{s.valor == null ? '—' : fmtBRL(s.valor)}</span>
+                      <span className="hidden sm:block">
+                        <BadgePago pago={s.pago} />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Cartao>
+        </div>
+      )}
+    </>
   )
 }

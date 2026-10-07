@@ -8,20 +8,24 @@ Multiusuário: cada conta vê só os próprios dados, garantido pelo banco (Row 
 - **Hospedagem:** GitHub Pages (deploy automático a cada push na `main`)
 - **Especificação de referência:** [legacy/README.md](legacy/README.md) — análise completa do app Expo antigo (que fica em [legacy/](legacy/)).
 
-## Funcionalidades (V1)
+## Funcionalidades
+
+**Layout:** mobile-first. No celular, barra inferior com botão **+** central (registrar serviço, agendar, novo cliente). A partir de 1024px, barra lateral com atalhos e telas em várias colunas. Formulários abrem como gaveta no celular e como janela no desktop, sem trocar de tela. No desktop: tecla **S** registra serviço, **A** agenda, **C** cria cliente.
 
 | Tela | O que faz |
 |---|---|
-| Landing / Entrar / Criar conta | Supabase Auth (e-mail + senha). Sessão persistente; botão de sair em *Minha conta*. |
-| Início | Saudação, cards (recebido hoje, pendente hoje, recebido no mês, nº de serviços hoje), agenda de hoje, serviços de hoje, aviso de agendamentos atrasados. |
-| Agenda | Calendário mensal (semana começa na segunda), lista do dia com **Iniciar** / **Cancelar** (com confirmação), editar/remarcar/excluir agendamento, seção de atrasados. |
-| Novo agendamento | Autocomplete de cliente (cria o cliente se não existir e reaproveita nome igual), data (padrão amanhã), hora (padrão 09:00), descrição. |
-| Novo serviço | Valor com máscara de centavos, Pago/Pendente, observação, **data escolhível** (padrão hoje). Vindo de um agendamento: cliente travado, observação = descrição e o agendamento é concluído na mesma transação. |
-| Clientes | Busca **sem acento**, cadastro, importação de contatos (Contact Picker no Android/Chrome ou arquivo **.vcf** em qualquer aparelho, com dedup). |
-| Perfil do cliente | Dados, editar, excluir, recebido/pendente total, histórico, WhatsApp (com DDI 55), Maps, atalhos para novo serviço/agendamento. |
-| Histórico | Filtros Hoje / Semana / Mês / Tudo (paginado), agrupado por dia com total; editar/excluir serviço (inclusive trocar o cliente e a data). |
-| Financeiro | Mês ou ano, cards, gráfico de receita (só pagos), top 5 clientes, últimos 8 serviços. |
-| Minha conta | Editar nome, sair, apagar todos os dados (exige digitar `APAGAR`). |
+| Landing | Página de apresentação com mockup do app, recursos, como funciona e dúvidas. |
+| Entrar / Criar conta | Supabase Auth (e-mail + senha), com botão de mostrar senha. |
+| Boas-vindas (onboarding) | 3 passos no primeiro acesso: profissão → serviços frequentes (viram atalhos) → importar clientes. Termina oferecendo agendar ou registrar o primeiro serviço. |
+| Início | Saudação, 4 indicadores (recebido hoje, no mês, **a receber**, visitas hoje), card do **próximo atendimento** (Iniciar, WhatsApp, Rota), agenda e serviços de hoje, **quem está devendo** com botão **Cobrar** (mensagem pronta no WhatsApp). |
+| Agenda | Calendário (semana começa na segunda), visitas do dia com **Iniciar**, próximas visitas, atrasadas em destaque; editar, remarcar, cancelar (com confirmação) e excluir. |
+| Registrar serviço / Agendar | Autocomplete de cliente (cria se não existir e reaproveita nome igual), **atalhos** de valor (R$ 50…300), dia (Hoje, Amanhã, próximos dias), horário e serviços frequentes. Ao iniciar uma visita, cliente e descrição já vêm preenchidos e a visita é concluída na mesma transação. |
+| Clientes | Lista com busca **sem acento** e perfil ao lado (desktop). Perfil: WhatsApp, ligar, rota, já pagou / a receber, **Cobrar** e **Recebi tudo**, histórico. Importação pela agenda do celular, arquivo **.vcf** ou lista digitada. |
+| Histórico | Filtros Hoje / Semana / Mês / **A receber** / Tudo (paginado), busca por cliente ou serviço, totais do filtro, agrupado por dia. |
+| Financeiro | Mês ou ano, indicadores, gráfico de recebido, melhores clientes, últimos serviços. No celular, divide a aba "Finanças" com o Histórico. |
+| Minha conta | Nome, profissão e serviços frequentes, importar contatos, sair, apagar todos os dados (exige digitar `APAGAR`). |
+
+Profissão, serviços frequentes e o status do onboarding ficam no `user_metadata` do Supabase Auth — não exigem tabela nova.
 
 Os bugs do app antigo listados na seção 11 da especificação foram corrigidos (datas em fuso local, senha com hash via Supabase Auth, WhatsApp sem DDI, cliente duplicado, etc.).
 
@@ -83,11 +87,11 @@ O script usa `upsert` por id (pode rodar de novo sem duplicar) e no fim mostra a
 ```
 src/
 ├── main.tsx / App.tsx        # providers, HashRouter, rotas protegidas
-├── lib/                      # supabase, datas (fuso local), moeda, telefone, texto, vcard
+├── lib/                      # supabase, datas (fuso local), moeda/cobrança, telefone, texto, vcard, profissões
 ├── api/                      # acesso a dados por entidade (supabase-js, paginação > 1000 linhas)
-├── hooks/                    # queries do TanStack Query + ações de agendamento
+├── hooks/                    # queries do TanStack Query, importação de contatos, ações de agendamento
 ├── auth/AuthContext.tsx      # sessão + perfil
-├── components/               # BottomSheet, diálogos/toasts, autocomplete, calendário, gráfico, sheets de edição
+├── components/               # AppShell (menu lateral/inferior), Modal, Acoes (modais globais + atalhos), formulários, calendário, gráfico
 └── pages/                    # telas
 supabase/schema.sql           # schema + RLS
 scripts/migrar.ts             # migração do import.json

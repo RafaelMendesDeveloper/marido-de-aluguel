@@ -27,7 +27,3 @@ export function useCancelarAgendamento() {
     }
   }
 }
-
-export function linkIniciar(a: Agendamento): string {
-  return `/servicos/novo?clienteId=${a.cliente_id}&agendamentoId=${a.id}`
-}

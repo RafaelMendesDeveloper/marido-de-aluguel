@@ -3,10 +3,10 @@ export function soDigitos(s: string): string {
 }
 
 /** Números brasileiros sem DDI (10–11 dígitos) ganham o 55 exigido pelo wa.me. */
-export function linkWhatsApp(telefone: string): string {
+export function linkWhatsApp(telefone: string, mensagem?: string): string {
   let d = soDigitos(telefone).replace(/^0+/, '')
   if (d.length === 10 || d.length === 11) d = `55${d}`
-  return `https://wa.me/${d}`
+  return `https://wa.me/${d}${mensagem ? `?text=${encodeURIComponent(mensagem)}` : ''}`
 }
 
 export function linkMaps(endereco: string): string {

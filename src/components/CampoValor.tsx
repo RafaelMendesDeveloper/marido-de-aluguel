@@ -16,7 +16,7 @@ type Props = {
 export function CampoValor({ centavos, onChange, autoFocus, grande }: Props) {
   return (
     <input
-      className={cx(inputCls, grande && 'py-4 text-2xl font-bold tracking-tight')}
+      className={cx(inputCls, grande && 'tabular py-3.5 text-2xl font-extrabold tracking-tight')}
       inputMode="numeric"
       autoComplete="off"
       autoFocus={autoFocus}

@@ -21,17 +21,17 @@ export function Calendario({ ano, mes, selecionado, hoje, marcados, onSelecionar
   const dias = getDaysInMonth(primeiro)
 
   return (
-    <div className="rounded-3xl border border-gray-200 bg-white p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+    <div className="rounded-2xl border border-ink-200/80 bg-white p-4 shadow-card sm:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <button type="button" aria-label="Mês anterior" onClick={() => onMudarMes(-1)} className="flex size-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 active:bg-gray-200">
+        <button type="button" aria-label="Mês anterior" onClick={() => onMudarMes(-1)} className="flex size-9 items-center justify-center rounded-lg border border-ink-200 text-ink-600 hover:bg-ink-50">
           <ChevronLeft className="size-5" />
         </button>
-        <span className="text-[17px] font-bold text-gray-900">{mesAno(ano, mes)}</span>
-        <button type="button" aria-label="Próximo mês" onClick={() => onMudarMes(1)} className="flex size-10 items-center justify-center rounded-full bg-gray-100 text-gray-700 active:bg-gray-200">
+        <span className="text-[17px] font-bold text-ink-900">{mesAno(ano, mes)}</span>
+        <button type="button" aria-label="Próximo mês" onClick={() => onMudarMes(1)} className="flex size-9 items-center justify-center rounded-lg border border-ink-200 text-ink-600 hover:bg-ink-50">
           <ChevronRight className="size-5" />
         </button>
       </div>
-      <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-400">
+      <div className="grid grid-cols-7 text-center text-xs font-semibold text-ink-400">
         {DIAS_SEMANA.map((d) => (
           <div key={d} className="py-1">
             {d}
@@ -58,19 +58,19 @@ export function Calendario({ ano, mes, selecionado, hoje, marcados, onSelecionar
             >
               <span
                 className={cx(
-                  'flex size-9 flex-col items-center justify-center rounded-full text-[15px]',
+                  'flex size-10 flex-col items-center justify-center rounded-xl text-[15px] font-medium transition-colors',
                   ehSelecionado
-                    ? 'bg-green-600 font-bold text-white'
+                    ? 'bg-brand-600 font-bold text-white shadow-marca'
                     : ehHoje
-                      ? 'bg-green-100 font-bold text-green-700'
+                      ? 'bg-brand-50 font-bold text-brand-700 ring-1 ring-brand-600/30'
                       : passado
-                        ? 'text-gray-400'
-                        : 'text-gray-900',
+                        ? 'text-ink-400 hover:bg-ink-50'
+                        : 'text-ink-900 hover:bg-ink-100',
                 )}
               >
                 {i + 1}
                 {marcados.has(iso) && (
-                  <span className={cx('mt-0.5 size-1 rounded-full', ehSelecionado ? 'bg-white' : passado ? 'bg-amber-500' : 'bg-green-600')} />
+                  <span className={cx('mt-0.5 size-1 rounded-full', ehSelecionado ? 'bg-white' : passado ? 'bg-amber-500' : 'bg-brand-600')} />
                 )}
               </span>
             </button>

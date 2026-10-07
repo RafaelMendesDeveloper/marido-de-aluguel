@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, HelpCircle, XCircle } from 'lucide-react'
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Botao, inputCls } from './ui'
@@ -54,15 +54,18 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
       {children}
       {dialogo &&
         createPortal(
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6" role="alertdialog" aria-modal="true">
-            <div className="absolute inset-0 animate-aparecer bg-black/40" onClick={() => responder(false)} />
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-5" role="alertdialog" aria-modal="true" aria-label={dialogo.titulo}>
+            <div className="absolute inset-0 animate-aparecer bg-ink-950/45 backdrop-blur-[2px]" onClick={() => responder(false)} />
             <div className="relative w-full max-w-sm animate-surgir rounded-3xl bg-white p-6 shadow-2xl">
-              <h2 className="text-lg font-bold text-gray-900">{dialogo.titulo}</h2>
-              {dialogo.mensagem && <div className="mt-2 text-[15px] text-gray-600">{dialogo.mensagem}</div>}
+              <div className={`mb-4 flex size-11 items-center justify-center rounded-2xl ${dialogo.perigo ? 'bg-red-50 text-red-600' : 'bg-brand-50 text-brand-600'}`}>
+                {dialogo.perigo ? <AlertTriangle className="size-5" /> : <HelpCircle className="size-5" />}
+              </div>
+              <h2 className="text-lg font-extrabold tracking-tight text-ink-900">{dialogo.titulo}</h2>
+              {dialogo.mensagem && <div className="mt-1.5 text-[15px] text-ink-600">{dialogo.mensagem}</div>}
               {dialogo.digitar && (
                 <div className="mt-4">
-                  <p className="mb-1.5 text-sm text-gray-600">
-                    Digite <strong className="text-gray-900">{dialogo.digitar}</strong> para confirmar:
+                  <p className="mb-1.5 text-sm text-ink-600">
+                    Digite <strong className="text-ink-900">{dialogo.digitar}</strong> para confirmar:
                   </p>
                   <input
                     className={inputCls}
@@ -74,7 +77,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
                   />
                 </div>
               )}
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 grid grid-cols-2 gap-3">
                 <Botao variante="secundario" onClick={() => responder(false)}>
                   {dialogo.cancelar ?? 'Voltar'}
                 </Botao>
@@ -87,14 +90,14 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
           document.body,
         )}
       {createPortal(
-        <div className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+0.75rem)] z-[70] mx-auto flex max-w-md flex-col items-center gap-2 px-4">
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-[70] flex flex-col items-center gap-2 px-4 lg:inset-x-auto lg:right-6 lg:bottom-6 lg:items-end">
           {toasts.map((t) => (
             <div
               key={t.id}
               role="status"
-              className="flex animate-surgir items-center gap-2 rounded-2xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-lg"
+              className="flex animate-surgir items-center gap-2.5 rounded-2xl bg-ink-900 py-3 pr-5 pl-4 text-sm font-semibold text-white shadow-elevado"
             >
-              {t.tipo === 'ok' ? <CheckCircle2 className="size-5 text-green-400" /> : <XCircle className="size-5 text-red-400" />}
+              {t.tipo === 'ok' ? <CheckCircle2 className="size-5 text-brand-400" /> : <XCircle className="size-5 text-red-400" />}
               <span>{t.texto}</span>
             </div>
           ))}

@@ -23,6 +23,11 @@ export function useServicos(periodo: { inicio?: string; fim?: string }) {
   })
 }
 
+/** Tudo que ainda não foi pago, de qualquer data. */
+export function useAReceber() {
+  return useQuery({ queryKey: ['servicos', 'a-receber'], queryFn: () => listarServicos({ pago: false }) })
+}
+
 export function useServicosDoCliente(clienteId: string | undefined) {
   return useQuery({
     queryKey: ['servicos', 'cliente', clienteId],

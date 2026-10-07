@@ -25,3 +25,24 @@ export function fmtCompacto(v: number): string {
 export function somar<T extends { valor: number | null }>(itens: T[]): number {
   return itens.reduce((t, s) => t + (s.valor ?? 0), 0)
 }
+
+/** Mensagem educada de cobrança para o WhatsApp. */
+export function mensagemCobranca(nome: string, total: number, qtd: number): string {
+  const primeiro = nome.trim().split(/\s+/)[0]
+  const servicos = qtd === 1 ? 'do serviço' : `dos ${qtd} serviços`
+  return `Olá, ${primeiro}! Tudo bem? Passando para lembrar do valor de ${fmtBRL(total)} referente ${servicos} que fiz pra você. Pode ser por Pix. Obrigado!`
+}
+
+/** Agrupa serviços não pagos por cliente, maior dívida primeiro. */
+export function devedores<T extends { cliente_id: string; valor: number | null; cliente?: { nome: string; telefone: string | null } | null }>(
+  servicos: T[],
+): { clienteId: string; nome: string; telefone: string | null; total: number; qtd: number }[] {
+  const mapa = new Map<string, { clienteId: string; nome: string; telefone: string | null; total: number; qtd: number }>()
+  for (const s of servicos) {
+    const d = mapa.get(s.cliente_id) ?? { clienteId: s.cliente_id, nome: s.cliente?.nome ?? 'Cliente', telefone: s.cliente?.telefone ?? null, total: 0, qtd: 0 }
+    d.total += s.valor ?? 0
+    d.qtd += 1
+    mapa.set(s.cliente_id, d)
+  }
+  return [...mapa.values()].sort((a, b) => b.total - a.total)
+}

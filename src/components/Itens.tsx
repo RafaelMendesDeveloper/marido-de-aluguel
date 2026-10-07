@@ -1,21 +1,23 @@
 import { ChevronRight } from 'lucide-react'
-import { fmtBRL } from '../lib/moeda'
+import type { ReactNode } from 'react'
 import { horaCurta } from '../lib/datas'
+import { fmtBRL } from '../lib/moeda'
 import type { Agendamento, Servico } from '../types'
-import { Avatar, BadgePago } from './ui'
+import { Avatar, BadgePago, cx } from './ui'
 
-/** Linha de serviço: avatar, cliente, detalhe, valor e status. */
-export function ItemServico({ servico, detalhe, onClick }: { servico: Servico; detalhe?: string | null; onClick: () => void }) {
+/** Linha de serviço: cliente, detalhe, valor e status. */
+export function ItemServico({ servico, detalhe, extra, onClick }: { servico: Servico; detalhe?: ReactNode; extra?: ReactNode; onClick: () => void }) {
   const nome = servico.cliente?.nome ?? 'Cliente'
   return (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-gray-50">
-      <Avatar nome={nome} forma="quadrado" tom={servico.pago ? 'verde' : 'vermelho'} />
+    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-5 py-3 text-left transition-colors hover:bg-ink-50 active:bg-ink-100">
+      <Avatar nome={nome} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[16px] font-semibold text-gray-900">{nome}</p>
-        {detalhe && <p className="truncate text-sm text-gray-500">{detalhe}</p>}
+        <p className="truncate text-[15px] font-semibold text-ink-900">{nome}</p>
+        {detalhe && <p className="truncate text-sm text-ink-500">{detalhe}</p>}
       </div>
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className={servico.pago ? 'font-bold text-green-800' : 'font-bold text-red-600'}>
+      {extra && <div className="hidden shrink-0 text-sm text-ink-500 md:block">{extra}</div>}
+      <div className="flex w-28 shrink-0 flex-col items-end gap-1">
+        <span className={cx('tabular text-[15px] font-bold', servico.pago ? 'text-ink-900' : 'text-amber-700')}>
           {servico.valor == null ? '—' : fmtBRL(servico.valor)}
         </span>
         <BadgePago pago={servico.pago} />
@@ -24,20 +26,26 @@ export function ItemServico({ servico, detalhe, onClick }: { servico: Servico; d
   )
 }
 
-/** Linha de agendamento com pílula de hora. */
-export function ItemAgendamento({ agendamento, onClick, atrasado }: { agendamento: Agendamento; onClick: () => void; atrasado?: boolean }) {
-  const [h, m] = horaCurta(agendamento.hora).split(':')
+/** Linha de agendamento com bloco de hora. */
+export function ItemAgendamento({ agendamento, onClick, atrasado, direita }: { agendamento: Agendamento; onClick: () => void; atrasado?: boolean; direita?: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-4 py-3 text-left active:bg-gray-50">
-      <div className={`flex w-14 shrink-0 flex-col items-center rounded-xl py-1.5 ${atrasado ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'}`}>
-        <span className="text-xl leading-none font-extrabold">{h}</span>
-        <span className="text-xs font-semibold">:{m}</span>
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[16px] font-semibold text-gray-900">{agendamento.cliente?.nome ?? 'Cliente'}</p>
-        <p className="truncate text-sm text-gray-500">{agendamento.descricao}</p>
-      </div>
-      <ChevronRight className="size-5 shrink-0 text-gray-300" />
-    </button>
+    <div className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-ink-50">
+      <button type="button" onClick={onClick} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <span
+          className={cx(
+            'tabular flex h-11 w-14 shrink-0 items-center justify-center rounded-xl text-[15px] font-extrabold',
+            atrasado ? 'bg-amber-50 text-amber-700' : 'bg-brand-50 text-brand-700',
+          )}
+        >
+          {horaCurta(agendamento.hora)}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[15px] font-semibold text-ink-900">{agendamento.cliente?.nome ?? 'Cliente'}</span>
+          <span className="block truncate text-sm text-ink-500">{agendamento.descricao}</span>
+        </span>
+        {!direita && <ChevronRight className="size-5 shrink-0 text-ink-300" />}
+      </button>
+      {direita}
+    </div>
   )
 }

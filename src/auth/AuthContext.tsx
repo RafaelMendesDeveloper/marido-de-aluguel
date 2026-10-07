@@ -4,6 +4,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { supabase } from '../lib/supabase'
 import type { Perfil } from '../types'
 
+export type Preferencias = {
+  profissao: string | null
+  servicosFrequentes: string[]
+  onboardingConcluido: boolean
+}
+
 type Resultado = { ok: true; aguardandoConfirmacao?: boolean } | { ok: false; erro: string }
 
 type AuthContextType = {
@@ -14,6 +20,8 @@ type AuthContextType = {
   cadastrar(nome: string, email: string, senha: string): Promise<Resultado>
   sair(): Promise<void>
   recarregarPerfil(): Promise<void>
+  preferencias: Preferencias
+  salvarPreferencias(p: Partial<Preferencias>): Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -96,6 +104,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { ok: true, aguardandoConfirmacao: !data.session }
   }, [])
 
+  const meta = session?.user.user_metadata
+  const preferencias = useMemo<Preferencias>(
+    () => ({
+      profissao: (meta?.profissao as string | undefined) ?? null,
+      servicosFrequentes: Array.isArray(meta?.servicos_frequentes) ? (meta.servicos_frequentes as string[]) : [],
+      onboardingConcluido: Boolean(meta?.onboarding_concluido),
+    }),
+    [meta],
+  )
+
+  // Preferências ficam no user_metadata do Supabase Auth (não exigem tabela).
+  const salvarPreferencias = useCallback(async (p: Partial<Preferencias>) => {
+    const data: Record<string, unknown> = {}
+    if (p.profissao !== undefined) data.profissao = p.profissao
+    if (p.servicosFrequentes !== undefined) data.servicos_frequentes = p.servicosFrequentes
+    if (p.onboardingConcluido !== undefined) data.onboarding_concluido = p.onboardingConcluido
+    const { data: r, error } = await supabase.auth.updateUser({ data })
+    if (error) throw new Error(error.message)
+    // Atualiza já, sem esperar o evento USER_UPDATED.
+    setSession((s) => (s && r.user ? { ...s, user: r.user } : s))
+  }, [])
+
   const sair = useCallback(async () => {
     await supabase.auth.signOut()
   }, [])
@@ -103,8 +133,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const recarregarPerfil = useCallback(() => carregarPerfil(session), [carregarPerfil, session])
 
   const valor = useMemo(
-    () => ({ session, perfil, carregando, entrar, cadastrar, sair, recarregarPerfil }),
-    [session, perfil, carregando, entrar, cadastrar, sair, recarregarPerfil],
+    () => ({ session, perfil, carregando, entrar, cadastrar, sair, recarregarPerfil, preferencias, salvarPreferencias }),
+    [session, perfil, carregando, entrar, cadastrar, sair, recarregarPerfil, preferencias, salvarPreferencias],
   )
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>
 }
